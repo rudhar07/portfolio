@@ -1,6 +1,6 @@
 import { Canvas, useThree } from '@react-three/fiber'
 import { Physics, RigidBody } from '@react-three/rapier'
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, Environment } from '@react-three/drei'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { Howl } from 'howler'
@@ -160,10 +160,10 @@ export default function App() {
   return (
     <>
       <Canvas shadows camera={{ position: [0, 1.5, 6], fov: 50 }}>
-        <ambientLight intensity={0.3} />
+        <Environment preset="city" />
         <directionalLight
           position={[3, 5, 5]}
-          intensity={2.5}
+          intensity={1.5}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
