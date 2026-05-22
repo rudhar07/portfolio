@@ -17,3 +17,41 @@ body,
 body {
   background: #000;
 }
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1.2s ease-out, transform 1.2s ease-out;
+}
+
+.hud.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hud h1 {
+  margin: 0;
+  font-size: clamp(48px, 9vw, 140px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.hud p {
+  margin: 12px 0 0;
+  font-size: clamp(12px, 1.2vw, 18px);
+  color: #D7263D;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
