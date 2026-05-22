@@ -1,8 +1,19 @@
 import { Canvas, useThree } from '@react-three/fiber'
 import { Physics, RigidBody } from '@react-three/rapier'
+import { useGLTF } from '@react-three/drei'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
+import { Howl } from 'howler'
 import { useRef, useState } from 'react'
+
+const USE_GLTF_PADDLE = false
+const PADDLE_MODEL_PATH = '/models/paddle.glb'
+
+const pock = new Howl({
+  src: ['/sounds/pock.mp3'],
+  volume: 0.6,
+  preload: true,
+})
 
 function Ball({ bodyRef }) {
   return (
@@ -54,10 +65,43 @@ function Paddle({ groupRef, position = [0, 0, 0], rotation = [0, 0, 0] }) {
   )
 }
 
+function PaddleGLTF({
+  groupRef,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+  modelScale = 1,
+  modelRotation = [0, 0, 0],
+  modelPosition = [0, 0, 0],
+}) {
+  const { scene } = useGLTF(PADDLE_MODEL_PATH)
+
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true
+      child.receiveShadow = true
+    }
+  })
+
+  return (
+    <group ref={groupRef} position={position} rotation={rotation}>
+      <primitive
+        object={scene}
+        scale={modelScale}
+        rotation={modelRotation}
+        position={modelPosition}
+      />
+    </group>
+  )
+}
+
 function Cinematic({ ballRef, paddleRef, onStrike }) {
   const { camera } = useThree()
 
   useGSAP(() => {
+    ballRef.current?.setTranslation({ x: 0, y: 5, z: 0 }, true)
+    ballRef.current?.setLinvel({ x: 0, y: 0, z: 0 }, true)
+    ballRef.current?.setAngvel({ x: 0, y: 0, z: 0 }, true)
+
     const tl = gsap.timeline()
 
     tl.to(camera.position, {
@@ -66,7 +110,7 @@ function Cinematic({ ballRef, paddleRef, onStrike }) {
       z: 3.8,
       duration: 1.5,
       ease: 'power2.inOut',
-    }, 2.0)
+    }, 1.5)
 
     tl.to(paddleRef.current.position, {
       x: 0.7,
@@ -74,19 +118,20 @@ function Cinematic({ ballRef, paddleRef, onStrike }) {
       z: 0.5,
       duration: 1.0,
       ease: 'power3.in',
-    }, 2.3)
+    }, 1.8)
 
     tl.to(paddleRef.current.rotation, {
       y: -0.1,
       z: 0.1,
       duration: 1.0,
       ease: 'power3.in',
-    }, 2.3)
+    }, 1.8)
 
     tl.call(() => {
       ballRef.current?.applyImpulse({ x: -1.2, y: 3.5, z: 5 }, true)
+      pock.play()
       onStrike()
-    }, [], 3.3)
+    }, [], 2.8)
 
     tl.to(camera.position, {
       x: 0,
@@ -94,7 +139,7 @@ function Cinematic({ ballRef, paddleRef, onStrike }) {
       z: 7,
       duration: 1.2,
       ease: 'power2.out',
-    }, 3.4)
+    }, 2.9)
   }, [])
 
   return null
@@ -103,7 +148,14 @@ function Cinematic({ ballRef, paddleRef, onStrike }) {
 export default function App() {
   const ballRef = useRef()
   const paddleRef = useRef()
+  const [started, setStarted] = useState(false)
   const [nameVisible, setNameVisible] = useState(false)
+
+  const paddleProps = {
+    groupRef: paddleRef,
+    position: [2.5, 0.5, 0.3],
+    rotation: [0, -0.4, 0.4],
+  }
 
   return (
     <>
@@ -120,17 +172,31 @@ export default function App() {
           <Ball bodyRef={ballRef} />
           <Floor />
         </Physics>
-        <Paddle
-          groupRef={paddleRef}
-          position={[2.5, 0.5, 0.3]}
-          rotation={[0, -0.4, 0.4]}
-        />
-        <Cinematic
-          ballRef={ballRef}
-          paddleRef={paddleRef}
-          onStrike={() => setNameVisible(true)}
-        />
+        {USE_GLTF_PADDLE ? (
+          <PaddleGLTF
+            {...paddleProps}
+            modelScale={1}
+            modelRotation={[0, 0, 0]}
+            modelPosition={[0, 0, 0]}
+          />
+        ) : (
+          <Paddle {...paddleProps} />
+        )}
+        {started && (
+          <Cinematic
+            ballRef={ballRef}
+            paddleRef={paddleRef}
+            onStrike={() => setNameVisible(true)}
+          />
+        )}
       </Canvas>
+
+      {!started && (
+        <button className="intro" onClick={() => setStarted(true)}>
+          <span className="intro-prompt">Press to Serve</span>
+          <span className="intro-hint">Click anywhere</span>
+        </button>
+      )}
 
       <div className={`hud ${nameVisible ? 'visible' : ''}`}>
         <h1>RUDHAR BAJAJ</h1>
