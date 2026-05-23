@@ -351,6 +351,10 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!started) {
+      window.scrollTo(0, 0)
+      lenisRef.current?.scrollTo(0, { immediate: true, force: true })
+    }
     document.body.style.overflow = started ? '' : 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [started])
