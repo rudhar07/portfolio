@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Howl } from 'howler'
+import Lenis from 'lenis'
 import { useEffect, useRef, useState } from 'react'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -172,7 +173,10 @@ function ScrollScene() {
 function Scoreboard() {
   const [rally, setRally] = useState(0)
   const [setNum, setSetNum] = useState(1)
-  const totalSets = 4
+  const [spin, setSpin] = useState('READY')
+  const totalSets = 5
+  const lastY = useRef(0)
+  const spinTimer = useRef(null)
 
   useEffect(() => {
     const sectionSelectors = [
@@ -180,6 +184,7 @@ function Scoreboard() {
       '.section-about',
       '.section-skills',
       '.section-projects',
+      '.section-contact',
     ]
 
     const onScroll = () => {
@@ -196,12 +201,26 @@ function Scoreboard() {
         if (rect.top <= center && rect.bottom >= center) current = i + 1
       })
       setSetNum(current)
+
+      const delta = window.scrollY - lastY.current
+      if (Math.abs(delta) > 1.5) {
+        setSpin(delta > 0 ? 'TOPSPIN' : 'BACKSPIN')
+        clearTimeout(spinTimer.current)
+        spinTimer.current = setTimeout(() => setSpin('READY'), 700)
+      }
+      lastY.current = window.scrollY
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(spinTimer.current)
+    }
   }, [])
+
+  const spinGlyph =
+    spin === 'TOPSPIN' ? '▲' : spin === 'BACKSPIN' ? '▼' : '·'
 
   return (
     <div className="scoreboard">
@@ -215,7 +234,87 @@ function Scoreboard() {
           {setNum} <span className="score-of">/ {totalSets}</span>
         </span>
       </div>
+      <div className="score-row">
+        <span className="score-label">Spin</span>
+        <span className={`score-value spin-${spin.toLowerCase()}`}>
+          <span className="spin-glyph">{spinGlyph}</span>
+          {spin}
+        </span>
+      </div>
     </div>
+  )
+}
+
+function ContactForm() {
+  const [status, setStatus] = useState('idle')
+  const ballRef = useRef(null)
+  const formInnerRef = useRef(null)
+
+  const handleServe = (e) => {
+    e.preventDefault()
+    if (status !== 'idle') return
+    setStatus('serving')
+    pock.play()
+
+    gsap.fromTo(
+      ballRef.current,
+      { opacity: 1, scale: 1, x: 0, y: 0, rotation: 0 },
+      {
+        x: window.innerWidth * 0.5,
+        y: -window.innerHeight * 0.85,
+        rotation: 720,
+        scale: 0.25,
+        opacity: 0,
+        duration: 1.3,
+        ease: 'power2.in',
+      }
+    )
+
+    gsap.to(formInnerRef.current, {
+      opacity: 0,
+      y: -20,
+      duration: 0.6,
+      delay: 0.4,
+      ease: 'power2.in',
+      onComplete: () => setStatus('served'),
+    })
+  }
+
+  if (status === 'served') {
+    return (
+      <div className="contact-served">
+        <p className="served-title">Served.</p>
+        <p className="served-sub">Reply en route.</p>
+      </div>
+    )
+  }
+
+  return (
+    <form className="contact-form" onSubmit={handleServe}>
+      <div ref={formInnerRef} className="contact-form-inner">
+        <label className="contact-field">
+          <span>Your Name</span>
+          <input type="text" name="name" required autoComplete="name" />
+        </label>
+        <label className="contact-field">
+          <span>Email</span>
+          <input type="email" name="email" required autoComplete="email" />
+        </label>
+        <label className="contact-field">
+          <span>Your Message</span>
+          <textarea name="message" rows={4} required />
+        </label>
+      </div>
+      <button
+        type="submit"
+        className="paddle-button"
+        disabled={status === 'serving'}
+        aria-label="Serve message"
+      >
+        <span className="paddle-button-face">Serve</span>
+        <span ref={ballRef} className="message-ball" aria-hidden="true" />
+      </button>
+    </form>
   )
 }
 
@@ -254,6 +353,35 @@ export default function App() {
   useEffect(() => {
     document.body.style.overflow = started ? '' : 'hidden'
     return () => { document.body.style.overflow = '' }
+  }, [started])
+
+  const lenisRef = useRef(null)
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      smoothTouch: false,
+    })
+    lenisRef.current = lenis
+
+    lenis.on('scroll', ScrollTrigger.update)
+
+    const rafCallback = (time) => lenis.raf(time * 1000)
+    gsap.ticker.add(rafCallback)
+    gsap.ticker.lagSmoothing(0)
+
+    return () => {
+      gsap.ticker.remove(rafCallback)
+      lenis.destroy()
+      lenisRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!lenisRef.current) return
+    if (started) lenisRef.current.start()
+    else lenisRef.current.stop()
   }, [started])
 
   useGSAP(() => {
@@ -318,6 +446,19 @@ export default function App() {
       scrollTrigger: {
         trigger: '.projects-list',
         start: 'top 75%',
+        toggleActions: 'play none none reverse',
+      },
+    })
+
+    gsap.from('.section-contact > *', {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.section-contact',
+        start: 'top 70%',
         toggleActions: 'play none none reverse',
       },
     })
@@ -476,6 +617,16 @@ export default function App() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section className="section section-contact">
+          <p className="section-eyebrow">Set Point</p>
+          <h2 className="section-title">Return the Serve.</h2>
+          <p className="section-body">
+            Drop a line. Collab, project, opportunity, or a friendly rally —
+            I read everything.
+          </p>
+          <ContactForm />
         </section>
       </main>
 

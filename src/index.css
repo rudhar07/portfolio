@@ -81,6 +81,153 @@
   font-weight: 500;
 }
 
+.spin-glyph {
+  display: inline-block;
+  margin-right: 0.4em;
+  font-size: 10px;
+  transform: translateY(-1px);
+}
+
+.score-value.spin-topspin {
+  color: #ff7d8c;
+}
+
+.score-value.spin-backspin {
+  color: #6dd5fa;
+}
+
+.score-value.spin-ready {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.contact-form {
+  margin-top: 2rem;
+  max-width: 540px;
+  position: relative;
+}
+
+.contact-form-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.contact-field > span {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.contact-field input,
+.contact-field textarea {
+  background: rgba(15, 15, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  padding: 0.9rem 1rem;
+  color: #ffffff;
+  font: inherit;
+  font-size: 15px;
+  resize: vertical;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.contact-field input:focus,
+.contact-field textarea:focus {
+  outline: none;
+  border-color: #D7263D;
+  background: rgba(20, 18, 22, 0.7);
+}
+
+.paddle-button {
+  position: relative;
+  margin-top: 2rem;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ff5566 0%,
+    #D7263D 45%,
+    #9c1828 100%
+  );
+  border: 5px solid #2a1810;
+  box-shadow:
+    0 12px 32px rgba(215, 38, 61, 0.25),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 6px rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-size: 14px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease;
+}
+
+.paddle-button:hover:not(:disabled) {
+  transform: rotate(-6deg) translateY(-3px);
+  box-shadow:
+    0 16px 38px rgba(215, 38, 61, 0.35),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 6px rgba(255, 255, 255, 0.15);
+}
+
+.paddle-button:active:not(:disabled) {
+  transform: rotate(-14deg) scale(0.94);
+}
+
+.paddle-button:disabled {
+  opacity: 0.6;
+}
+
+.message-ball {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.contact-served {
+  margin-top: 2rem;
+}
+
+.served-title {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.served-sub {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D7263D;
+  margin: 0;
+}
+
 html,
 body {
   margin: 0;
