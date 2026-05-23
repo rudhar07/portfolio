@@ -265,7 +265,12 @@ export default function App() {
       </div>
 
       <main>
-        <section className="section section-hero" />
+        <section className="section section-hero">
+          <div className={`hud ${nameVisible ? 'visible' : ''}`}>
+            <h1>RUDHAR BAJAJ</h1>
+            <p>Rally · Code · Repeat</p>
+          </div>
+        </section>
         <section className="section section-about">
           <p className="section-eyebrow">About</p>
           <h2 className="section-title">
@@ -324,11 +329,6 @@ export default function App() {
           <span className="intro-hint">Click anywhere</span>
         </button>
       )}
-
-      <div className={`hud ${nameVisible ? 'visible' : ''}`}>
-        <h1>RUDHAR BAJAJ</h1>
-        <p>Rally · Code · Repeat</p>
-      </div>
     </>
   )
 }

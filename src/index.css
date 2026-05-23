@@ -169,8 +169,12 @@ main {
   }
 }
 
+.section-hero {
+  position: relative;
+}
+
 .hud {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   display: flex;
@@ -181,7 +185,6 @@ main {
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 1.2s ease-out, transform 1.2s ease-out;
-  z-index: 10;
 }
 
 .hud.visible {
