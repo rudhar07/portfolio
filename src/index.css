@@ -120,6 +120,117 @@ main {
   border-radius: 2px;
 }
 
+.projects-list {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  counter-reset: project;
+  max-width: 880px;
+}
+
+.project {
+  margin: 0 0 1.5rem;
+}
+
+.project-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 2rem;
+  align-items: start;
+  padding: 1.75rem 1.5rem 1.75rem 1.75rem;
+  background: rgba(15, 15, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 2px solid #D7263D;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    background 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(215, 38, 61, 0.4);
+  border-left-color: #ff5566;
+  background: rgba(20, 18, 22, 0.7);
+}
+
+.project-num {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 900;
+  color: rgba(215, 38, 61, 0.55);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.project-body {
+  min-width: 0;
+}
+
+.project-title {
+  margin: 0 0 0.25rem;
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.project-role {
+  margin: 0 0 0.9rem;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(10px, 0.9vw, 12px);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #D7263D;
+  font-weight: 700;
+}
+
+.project-desc {
+  margin: 0 0 1rem;
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.55;
+  color: #c8c5be;
+  max-width: 60ch;
+}
+
+.project-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-tags li {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: #9a978f;
+}
+
+.project-arrow {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.3);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.3s ease;
+  align-self: center;
+}
+
+.project-card:hover .project-arrow {
+  color: #D7263D;
+  transform: translateX(6px);
+}
+
 .intro {
   position: fixed;
   inset: 0;

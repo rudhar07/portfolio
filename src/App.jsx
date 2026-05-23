@@ -225,6 +225,32 @@ export default function App() {
         toggleActions: 'play none none reverse',
       },
     })
+
+    gsap.from('.section-projects > *', {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.section-projects',
+        start: 'top 70%',
+        toggleActions: 'play none none reverse',
+      },
+    })
+
+    gsap.from('.project', {
+      y: 80,
+      opacity: 0,
+      duration: 0.9,
+      stagger: 0.12,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.projects-list',
+        start: 'top 75%',
+        toggleActions: 'play none none reverse',
+      },
+    })
   }, [])
 
   return (
@@ -299,11 +325,11 @@ export default function App() {
             {[
               { name: 'React', speed: 142 },
               { name: 'Three.js / R3F', speed: 128 },
-              { name: 'TypeScript', speed: 135 },
+              { name: 'TypeScript', speed: 115 },
               { name: 'Node.js', speed: 124 },
               { name: 'GSAP', speed: 130 },
               { name: 'Python', speed: 118 },
-              { name: 'C++ / DSA', speed: 112 },
+              { name: 'Java / DSA', speed: 138 },
             ].map((skill) => {
               const pct = Math.min(100, (skill.speed / 160) * 100)
               return (
@@ -320,6 +346,66 @@ export default function App() {
               )
             })}
           </ul>
+        </section>
+
+        <section className="section section-projects">
+          <p className="section-eyebrow">Tournament</p>
+          <h2 className="section-title">Matches Played.</h2>
+          <p className="section-body">
+            Selected projects. Each one a different opponent, a different
+            game to learn.
+          </p>
+          <ol className="projects-list">
+            {[
+              {
+                title: 'MockForge',
+                role: 'Solo · 2026',
+                desc: 'Built a full-stack AI-powered interview simulator that recreates real technical interview experiences with timed DSA and coding rounds, live code execution, automated evaluation, and AI-generated performance feedback. Integrated Monaco Editor for an IDE-like coding environment and Judge0 for secure code compilation and test case execution. Features include JWT authentication, topic-wise interview sessions, leaderboard rankings, attempt history, admin question management, and responsive dark-mode UI.',
+                tags: ['React 19', 'Node.js', 'Express', 'MongoDB', 'Monaco Editor', 'Judge0 API', 'Tailwind CSS'],
+                href: 'https://mockforge-h8jw.onrender.com/',
+              },
+              {
+                title: 'DocuMind',
+                role: 'Solo · 2026',
+                desc: 'Created a full-stack Retrieval-Augmented Generation (RAG) platform for querying PDFs and notes conversationally. Integrated embedding generation, pgvector similarity search, intelligent chunking, and responsive chat UI with reliable LLM fallback handling.',
+                tags: ['Next.js', 'TypeScript', 'Tailwind', 'React', 'Supabase Postgres'],
+                href: 'https://docu-mind-ai-rag.vercel.app/',
+              },
+              {
+                title: 'PersonaAI',
+                role: 'Solo · 2026',
+                desc: 'Developed an AI-powered chat platform where users can interact with different mentor personas in real time. Implemented streaming responses, persona-specific system prompts, robust error handling, and a modern responsive interface using Next.js and Tailwind CSS.',
+                tags: ['Next.js', 'TypeScript', 'Tailwind'],
+                href: 'https://persona-talk-ai.vercel.app/',
+              },
+              {
+                title: 'Project Four',
+                role: 'Open Source · 2023',
+                desc: 'Contributed to / shipped this library. Edit me.',
+                tags: ['TypeScript', 'Node.js'],
+                href: '#',
+              },
+            ].map((project, i) => (
+              <li className="project" key={project.title}>
+                <a className="project-card" href={project.href} target="_blank" rel="noopener noreferrer">
+                  <span className="project-num">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="project-body">
+                    <h3 className="project-title">{project.title}</h3>
+                    <p className="project-role">{project.role}</p>
+                    <p className="project-desc">{project.desc}</p>
+                    <ul className="project-tags">
+                      {project.tags.map((t) => (
+                        <li key={t}>{t}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <span className="project-arrow">→</span>
+                </a>
+              </li>
+            ))}
+          </ol>
         </section>
       </main>
 
