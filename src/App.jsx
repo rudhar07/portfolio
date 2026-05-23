@@ -169,6 +169,76 @@ function ScrollScene() {
   return null
 }
 
+function Scoreboard() {
+  const [rally, setRally] = useState(0)
+  const [setNum, setSetNum] = useState(1)
+  const totalSets = 4
+
+  useEffect(() => {
+    const sectionSelectors = [
+      '.section-hero',
+      '.section-about',
+      '.section-skills',
+      '.section-projects',
+    ]
+
+    const onScroll = () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight
+      const progress = total > 0 ? Math.min(1, window.scrollY / total) : 0
+      setRally(Math.floor(progress * 9999))
+
+      const center = window.innerHeight / 2
+      let current = 1
+      sectionSelectors.forEach((sel, i) => {
+        const el = document.querySelector(sel)
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        if (rect.top <= center && rect.bottom >= center) current = i + 1
+      })
+      setSetNum(current)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  return (
+    <div className="scoreboard">
+      <div className="score-row">
+        <span className="score-label">Rally</span>
+        <span className="score-value">{String(rally).padStart(4, '0')}</span>
+      </div>
+      <div className="score-row">
+        <span className="score-label">Set</span>
+        <span className="score-value">
+          {setNum} <span className="score-of">/ {totalSets}</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function Cursor() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    const xTo = gsap.quickTo(ref.current, 'x', { duration: 0.3, ease: 'power3' })
+    const yTo = gsap.quickTo(ref.current, 'y', { duration: 0.3, ease: 'power3' })
+
+    const onMove = (e) => {
+      xTo(e.clientX)
+      yTo(e.clientY)
+    }
+
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  return <div ref={ref} className="cursor-ball" aria-hidden="true" />
+}
+
 export default function App() {
   const ballRef = useRef()
   const paddleRef = useRef()
@@ -415,6 +485,9 @@ export default function App() {
           <span className="intro-hint">Click anywhere</span>
         </button>
       )}
+
+      {started && <Scoreboard />}
+      <Cursor />
     </>
   )
 }
