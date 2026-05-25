@@ -1,7 +1,11 @@
 :root {
+  --font-display: 'Bebas Neue', 'Anton', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
   color-scheme: dark;
   background: #000;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -46,7 +50,7 @@
   border-radius: 2px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -119,7 +123,7 @@
 }
 
 .contact-field > span {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -212,15 +216,17 @@
 }
 
 .served-title {
-  font-size: clamp(36px, 5vw, 64px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 400;
   color: #ffffff;
   margin: 0 0 0.5rem;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
 }
 
 .served-sub {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -275,6 +281,7 @@ main {
 .section-eyebrow {
   margin: 0 0 1rem;
   color: #D7263D;
+  font-family: var(--font-mono);
   font-size: clamp(11px, 1vw, 14px);
   letter-spacing: 0.5em;
   text-transform: uppercase;
@@ -283,10 +290,11 @@ main {
 
 .section-title {
   margin: 0 0 2rem;
-  font-size: clamp(36px, 6vw, 88px);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 128px);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 0.95;
   color: #ffffff;
   max-width: 14ch;
 }
@@ -316,14 +324,16 @@ main {
 }
 
 .skill-name {
-  font-size: clamp(16px, 1.6vw, 22px);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 400;
   color: #ffffff;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.03em;
+  line-height: 1;
 }
 
 .skill-speed {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(11px, 0.95vw, 13px);
   letter-spacing: 0.2em;
   color: #D7263D;
@@ -383,7 +393,7 @@ main {
 }
 
 .project-num {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(28px, 3vw, 44px);
   font-weight: 900;
   color: rgba(215, 38, 61, 0.55);
@@ -397,15 +407,17 @@ main {
 
 .project-title {
   margin: 0 0 0.25rem;
-  font-size: clamp(20px, 2vw, 28px);
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 400;
   color: #ffffff;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
 }
 
 .project-role {
   margin: 0 0 0.9rem;
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(10px, 0.9vw, 12px);
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -431,7 +443,7 @@ main {
 }
 
 .project-tags li {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -477,15 +489,16 @@ main {
 
 .intro-prompt {
   color: #ffffff;
-  font-size: clamp(28px, 4vw, 56px);
-  font-weight: 800;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: clamp(42px, 6vw, 88px);
+  font-weight: 400;
+  letter-spacing: 0.18em;
   animation: pulse 1.6s ease-in-out infinite;
 }
 
 .intro-hint {
   color: #D7263D;
+  font-family: var(--font-mono);
   font-size: clamp(11px, 1vw, 14px);
   letter-spacing: 0.5em;
   text-transform: uppercase;
@@ -529,19 +542,21 @@ main {
 
 .hud h1 {
   margin: 0;
-  font-size: clamp(48px, 9vw, 140px);
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(64px, 14vw, 220px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 0.9;
   color: #ffffff;
-  text-transform: uppercase;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 }
 
 .hud p {
   margin: 12px 0 0;
+  font-family: var(--font-mono);
   font-size: clamp(12px, 1.2vw, 18px);
   color: #D7263D;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
 }
