@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500&family=JetBrains+Mono:wght@600&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { background: #0a0a0a; color: #f4f1ea; font-family: Inter, sans-serif; position: relative; }
+  .half { position: absolute; top: 0; bottom: 0; right: 0; width: 330px; background: #eeeae1; }
+  .table { position: absolute; right: 92px; top: 70px; width: 146px; height: 262px; background: #0d3b66; outline: 2px solid #f4f1ea; outline-offset: -6px; }
+  .table::before { content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 1px; background: #f4f1ea; }
+  .table::after { content: ''; position: absolute; left: -16px; right: -16px; top: 50%; height: 4px; background: #0b0b0b; }
+  .ball { position: absolute; right: 120px; top: 132px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px #0b0b0b; }
+  .paddle { position: absolute; right: 116px; top: 380px; width: 104px; height: 104px; border-radius: 50%; border: 6px solid #8b5a2b; background: linear-gradient(90deg, #d7263d 50%, #111 50%); }
+  .handle { position: absolute; right: 158px; top: 486px; width: 26px; height: 60px; background: #3a2418; }
+  .copy { position: absolute; left: 72px; top: 64px; width: 720px; }
+  .name { font-family: 'JetBrains Mono', monospace; font-size: 22px; letter-spacing: .3em; text-transform: uppercase; }
+  .name::before { content: ''; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #d7263d; margin-right: 16px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 112px; line-height: .88; margin: 40px 0 0; white-space: nowrap; text-transform: uppercase; }
+  p { font-size: 26px; color: #a19d94; margin: 30px 0 0; max-width: 640px; line-height: 1.35; }
+  .tag { position: absolute; left: 72px; bottom: 56px; font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: .22em; color: #ff5a69; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="half"></div>
+  <div class="table"></div><div class="ball"></div>
+  <div class="paddle"></div><div class="handle"></div>
+  <div class="copy">
+    <div class="name">Rudhar Bajaj</div>
+    <h1>I build the arenas<br>AI agents train in.</h1>
+    <p>RL environments and verifiers for coding agents. State-level table tennis player.</p>
+  </div>
+  <div class="tag">Red rubber · Black rubber · rudharbajaj.vercel.app</div>
+</body>
+</html>
