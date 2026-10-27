@@ -9,12 +9,12 @@
 export const site = {
   name: 'Rudhar Bajaj',
   url: 'https://rudharbajaj.vercel.app',
-  title: 'Rudhar Bajaj, RL Environments & Full-Stack Engineer',
+  title: 'Rudhar Bajaj',
   description:
     'I build the environments coding agents are trained and graded in. ' +
     'State-level table tennis player. CS at Scaler School of Technology and BITS Pilani.',
 
-  email: 'rudhar.24bcs10143@sst.scaler.com', // TODO: switch to a personal address before the college one expires (2028)
+  email: 'rudharbajaj@gmail.com', // TODO: switch to a personal address before the college one expires (2028)
   resume: '/resume.pdf',
 
   socials: [
