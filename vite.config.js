@@ -7,4 +7,10 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom', 'three'],
   },
+  build: {
+    // the repo is public anyway; maps make production errors readable
+    sourcemap: true,
+    // three.js is the one big chunk, and it is lazy-loaded after first paint on purpose
+    chunkSizeWarningLimit: 600,
+  },
 })

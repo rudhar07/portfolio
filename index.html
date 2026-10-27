@@ -1,19 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-side="red">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rudhar Bajaj, RL Environments &amp; Full-Stack Engineer</title>
+    <meta name="description" content="I build the environments coding agents are trained and graded in. State-level table tennis player. CS at Scaler School of Technology and BITS Pilani." />
+    <link rel="canonical" href="https://rudharbajaj.vercel.app/" />
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rudharbajaj.vercel.app/" />
+    <meta property="og:title" content="Rudhar Bajaj, RL Environments &amp; Full-Stack Engineer" />
+    <meta property="og:description" content="I build the environments coding agents are trained and graded in. State-level table tennis player." />
+    <meta property="og:image" content="https://rudharbajaj.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Rudhar Bajaj, RL Environments &amp; Full-Stack Engineer" />
+    <meta name="twitter:description" content="I build the environments coding agents are trained and graded in. State-level table tennis player." />
+    <meta name="twitter:image" content="https://rudharbajaj.vercel.app/og.png" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- fonts load without blocking first paint; the system fallbacks are close enough to swap from -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
-    <title>RUDHAR BAJAJ</title>
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      />
+    </noscript>
+
+    <script>
+      // Before first paint: pick the side from the URL so a shared ?side=black link never flashes red.
+      ;(function () {
+        var d = document.documentElement
+        d.classList.add('js')
+        try {
+          if (new URLSearchParams(location.search).get('side') === 'black') d.dataset.side = 'black'
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="root"><!--app-html--></div>
+    <!--app-state-->
+    <script type="module" src="/src/entry-client.jsx"></script>
   </body>
 </html>
