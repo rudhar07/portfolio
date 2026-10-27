@@ -30,6 +30,11 @@ results.auto = await run('auto', () => {}, 15)
 results.perfect = await run('perfect', (h, s) => h.debug.steer(s.x), 15)
 results.slightlyOff = await run('off by 0.12', (h, s) => h.debug.steer(s.x + 0.12), 15)
 results.never = await run('never', (h) => h.debug.steer(1.05), 15)
+// touch: every return should buzz once (navigator.vibrate is counted, not felt)
+let buzzes = 0
+navigator.vibrate = () => { buzzes++; return true }
+results.touchPerfect = await run('touch perfect', (h, s) => h.debug.steer(s.x, 'touch'), 15)
+results.touchPerfect.buzzes = buzzes
 document.getElementById('out').textContent = JSON.stringify(results)
 </script>
 </body></html>

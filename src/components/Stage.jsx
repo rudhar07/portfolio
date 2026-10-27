@@ -10,23 +10,23 @@ import { rallyStore, reportRally, sideStore } from '../lib/stores.js'
  */
 export default function Stage() {
   const canvasRef = useRef(null)
-  const { user } = useSyncExternalStore(rallyStore.subscribe, rallyStore.get, rallyStore.getServer)
+  const { user, rally, best } = useSyncExternalStore(rallyStore.subscribe, rallyStore.get, rallyStore.getServer)
 
   useEffect(() => {
     const el = canvasRef.current
     if (!el) return
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const lowPower = window.matchMedia('(pointer: coarse)').matches
-    let rally = null
+    let scene = null
     let cancelled = false
     let idleId = 0
-    const unsubscribe = sideStore.subscribe(() => rally?.showSide(sideStore.get()))
+    const unsubscribe = sideStore.subscribe(() => scene?.showSide(sideStore.get()))
 
     function start() {
       import('../scene/rally.js')
         .then(({ mountRally }) => {
           if (cancelled) return
-          rally = mountRally(el, { reducedMotion, lowPower, side: sideStore.get(), onRally: reportRally })
+          scene = mountRally(el, { reducedMotion, lowPower, side: sideStore.get(), onRally: reportRally })
           el.dataset.ready = 'true'
         })
         .catch(() => {
@@ -47,7 +47,7 @@ export default function Stage() {
       if (window.cancelIdleCallback) window.cancelIdleCallback(idleId)
       else window.clearTimeout(idleId)
       unsubscribe()
-      rally?.dispose()
+      scene?.dispose()
     }
   }, [])
 
@@ -101,7 +101,19 @@ export default function Stage() {
               </>
             )}
           </span>
-          <span className="hint-touch">Demo rally · play it on a computer</span>
+          {/* the scoreboard is hidden on phones, so the touch hint carries the count */}
+          <span className="hint-touch">
+            {user ? (
+              <>
+                <span className="hint-live">Rally {String(rally).padStart(2, '0')}</span> · best{' '}
+                {String(best).padStart(2, '0')} · drag to return
+              </>
+            ) : (
+              <>
+                Drag across the table to <span className="hint-live">become the player</span>
+              </>
+            )}
+          </span>
         </p>
       </div>
     </section>

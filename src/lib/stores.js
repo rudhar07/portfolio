@@ -38,8 +38,8 @@ export function setSide(side) {
 // --- rally -----------------------------------------------------------------------------------
 
 const BEST_KEY = 'rb:best-rally'
-let rallyState = { rally: 0, best: 0, user: false }
-const serverRally = { rally: 0, best: 0, user: false }
+let rallyState = { rally: 0, best: 0, user: false, input: 'mouse' }
+const serverRally = { rally: 0, best: 0, user: false, input: 'mouse' }
 
 function readBest() {
   try {
@@ -54,8 +54,8 @@ export const rallyStore = createStore(
   () => serverRally,
 )
 
-/** @param {{rally: number, user: boolean}} s */
-export function reportRally({ rally, user }) {
+/** @param {{rally: number, user: boolean, input: 'mouse' | 'touch'}} s */
+export function reportRally({ rally, user, input }) {
   let best = rallyState.best || readBest()
   if (user && rally > best) {
     best = rally
@@ -65,7 +65,7 @@ export function reportRally({ rally, user }) {
       // storage blocked: the best score just lasts for this visit
     }
   }
-  rallyState = { rally, best, user }
+  rallyState = { rally, best, user, input }
   rallyStore.notify()
 }
 

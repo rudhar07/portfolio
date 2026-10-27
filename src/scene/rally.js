@@ -10,8 +10,10 @@
  * Units are metres and seconds, on a regulation table. +z is the player's (camera) side.
  *
  * Modes: with no pointer over the stage both paddles are automatic and the rally plays itself.
- * Move a mouse over the stage and the near paddle follows it; returns you make count toward the
- * rally shown on the scoreboard. Miss and the opponent serves again.
+ * Move a mouse over the stage, or put a finger on it, and the near paddle follows; returns you
+ * make count toward the rally. Miss and the opponent serves again. On touch, each return gives a
+ * short vibration where the device supports it, and lifting the finger hands the paddle back to
+ * the computer after a grace period, so you can let go between shots.
  */
 
 import * as THREE from 'three'
@@ -26,6 +28,8 @@ const BOUNCE = 0.86
 const PLAYER_Z = HALF_L + 0.18
 const OPP_Z = -(HALF_L + 0.18)
 const REACH = 0.2 // how far either side of the ball the near paddle still makes contact
+const TOUCH_GRACE_MS = 2500 // how long the paddle stays yours after the finger lifts
+const HIT_BUZZ_MS = 14
 
 const COLORS = {
   table: 0x174f86,
@@ -142,7 +146,7 @@ function makePaddle(front, back) {
  * Mount the rally into `container`.
  *
  * @param {HTMLElement} container
- * @param {{ reducedMotion: boolean, lowPower?: boolean, side?: 'red' | 'black', onRally: (s: {rally: number, user: boolean}) => void }} opts
+ * @param {{ reducedMotion: boolean, lowPower?: boolean, side?: 'red' | 'black', onRally: (s: {rally: number, user: boolean, input: 'mouse' | 'touch'}) => void }} opts
  * @returns {{ dispose: () => void, showSide: (side: 'red' | 'black') => void }}
  */
 export function mountRally(container, { reducedMotion, lowPower = false, onRally, side: initialSide = 'red' }) {
@@ -193,10 +197,20 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   let bounces = { player: 0, opp: 0 }
   let rally = 0
   let user = false
+  let input = 'mouse' // what is steering the near paddle while `user` is true
   let pointerX = 0
   let paddleVx = 0
 
-  const emit = () => onRally({ rally, user })
+  const emit = () => onRally({ rally, user, input })
+
+  function buzz() {
+    if (input !== 'touch') return
+    try {
+      navigator.vibrate?.(HIT_BUZZ_MS)
+    } catch {
+      // vibration blocked or unsupported (iOS Safari): the pock is enough
+    }
+  }
 
   // the near paddle shows the camera the rubber of the side the page is on
   let facing = Math.PI
@@ -291,6 +305,7 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
         const tx = clamp(-pos.x * 0.3 + offset * -2.5 + paddleVx * 0.08, -0.65, 0.65)
         hit('player', tx, rand(-1.15, -0.55), 4.2 + Math.min(Math.abs(paddleVx) * 0.35, 2.4))
         rally += 1
+        buzz()
         emit()
       }
     }
@@ -323,23 +338,54 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -PLAYER_Z)
   const hitPoint = new THREE.Vector3()
   const ndc = new THREE.Vector2()
-  function onMove(e) {
-    if (e.pointerType !== 'mouse') return
+  function aim(e) {
     const r = container.getBoundingClientRect()
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
     ray.setFromCamera(ndc, camera)
     if (ray.ray.intersectPlane(plane, hitPoint)) pointerX = hitPoint.x
-    if (!user) {
-      user = true
-      rally = 0
-      emit()
-    }
   }
-  function onLeave() {
+  function takeOver(type) {
+    if (user && input === type) return
+    user = true
+    input = type
+    rally = 0
+    emit()
+  }
+  function release() {
     if (!user) return
     user = false
     rally = 0
     emit()
+  }
+
+  // Touch: the stage is `touch-action: pan-y`, so vertical swipes still scroll the page while
+  // horizontal drags and taps arrive here. A cancel means the browser took the gesture for a scroll.
+  let touching = false
+  let releaseTimer = 0
+  function onDown(e) {
+    if (e.pointerType !== 'touch') return
+    touching = true
+    clearTimeout(releaseTimer)
+    aim(e)
+    takeOver('touch')
+  }
+  function onUp(e) {
+    if (e.pointerType !== 'touch') return
+    touching = false
+    clearTimeout(releaseTimer)
+    releaseTimer = setTimeout(release, TOUCH_GRACE_MS)
+  }
+  function onMove(e) {
+    if (e.pointerType === 'mouse') {
+      aim(e)
+      takeOver('mouse')
+    } else if (e.pointerType === 'touch' && touching) {
+      aim(e)
+    }
+  }
+  function onLeave(e) {
+    // a finger lifting also fires pointerleave; touch hands back on its own timer instead
+    if (e.pointerType === 'mouse') release()
   }
 
   if (reducedMotion) {
@@ -360,7 +406,10 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
     }
   }
 
+  container.addEventListener('pointerdown', onDown)
   container.addEventListener('pointermove', onMove)
+  container.addEventListener('pointerup', onUp)
+  container.addEventListener('pointercancel', onUp)
   container.addEventListener('pointerleave', onLeave)
 
   let visible = true
@@ -400,17 +449,21 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
     showSide,
     // for scripted checks of the rally (see CHANGES.md): read the ball, steer the near paddle
     debug: {
-      state: () => ({ x: pos.x, y: pos.y, z: pos.z, live, rally, user, hitter }),
-      steer(x) {
-        user = true
+      state: () => ({ x: pos.x, y: pos.y, z: pos.z, live, rally, user, input, hitter }),
+      steer(x, type = 'mouse') {
+        takeOver(type)
         pointerX = x
       },
     },
     dispose() {
       cancelAnimationFrame(raf)
+      clearTimeout(releaseTimer)
       io.disconnect()
       ro.disconnect()
+      container.removeEventListener('pointerdown', onDown)
       container.removeEventListener('pointermove', onMove)
+      container.removeEventListener('pointerup', onUp)
+      container.removeEventListener('pointercancel', onUp)
       container.removeEventListener('pointerleave', onLeave)
       renderer.dispose()
       renderer.domElement.remove()

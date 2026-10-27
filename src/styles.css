@@ -514,6 +514,15 @@ html[data-side='black'] .score-row dd.is-live {
   opacity: 1;
 }
 
+/* horizontal drags steer the paddle; vertical swipes still scroll the page */
+.stage-canvas {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .stage-canvas canvas {
   display: block;
   width: 100% !important;
