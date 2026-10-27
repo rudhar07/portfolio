@@ -1,0 +1,35 @@
+<!doctype html>
+<html><body style="margin:0">
+<div id="c" style="width:800px;height:600px"></div>
+<pre id="out">running</pre>
+<script type="module">
+import { mountRally } from '/src/scene/rally.js'
+const el = document.getElementById('c')
+const results = {}
+function run(name, policy, seconds) {
+  return new Promise((resolve) => {
+    el.innerHTML = ''
+    let maxRally = 0, hits = 0, lastHitter = null, liveFrames = 0, frames = 0, serves = 0, wasLive = false
+    const h = mountRally(el, { reducedMotion: false, onRally: ({ rally }) => { maxRally = Math.max(maxRally, rally) } })
+    const t0 = performance.now()
+    function loop() {
+      const s = h.debug.state()
+      policy(h, s)
+      frames++
+      if (s.live) liveFrames++
+      if (s.live && !wasLive) serves++
+      wasLive = s.live
+      if (s.hitter !== lastHitter) { hits++; lastHitter = s.hitter }
+      if (performance.now() - t0 < seconds * 1000) requestAnimationFrame(loop)
+      else { h.dispose(); resolve({ maxRally, hits, serves, livePct: Math.round(100 * liveFrames / frames), frames }) }
+    }
+    requestAnimationFrame(loop)
+  })
+}
+results.auto = await run('auto', () => {}, 15)
+results.perfect = await run('perfect', (h, s) => h.debug.steer(s.x), 15)
+results.slightlyOff = await run('off by 0.12', (h, s) => h.debug.steer(s.x + 0.12), 15)
+results.never = await run('never', (h) => h.debug.steer(1.05), 15)
+document.getElementById('out').textContent = JSON.stringify(results)
+</script>
+</body></html>
