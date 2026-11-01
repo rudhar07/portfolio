@@ -14,8 +14,11 @@ export const site = {
     'I build the environments coding agents are trained and graded in. ' +
     'State-level table tennis player. CS at Scaler School of Technology and BITS Pilani.',
 
-  email: 'rudharbajaj@gmail.com', // TODO: switch to a personal address before the college one expires (2028)
+  email: 'rudharbajaj@gmail.com',
   resume: '/resume.pdf',
+
+  // the most recent thing you shipped; shows in the broadcast ticker under the hero
+  lastShipped: 'Touch play on phones',
 
   socials: [
     { label: 'GitHub', href: 'https://github.com/rudhar07' },

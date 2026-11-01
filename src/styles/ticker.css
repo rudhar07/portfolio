@@ -1,0 +1,96 @@
+/* Broadcast ticker: a full-bleed strip in inverted colours, so it reads as a TV lower band on
+   either side of the paddle. */
+
+.ticker {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 46px;
+  background: var(--ink);
+  color: var(--bg);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ticker-badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+  padding: 0 18px 0 var(--gutter);
+  background: var(--rubber-red);
+  color: #fff;
+  box-shadow: 14px 0 18px -6px var(--ink);
+}
+
+.ticker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: ticker-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes ticker-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.ticker-window {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.ticker-row {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticker-row li {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding-left: 22px;
+}
+
+/* a ball between items */
+.ticker-row li::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: 22px;
+  border-radius: 50%;
+  background: var(--rubber-red);
+}
+
+@media (max-width: 820px) {
+  .ticker {
+    height: 40px;
+    font-size: 11px;
+  }
+  .ticker-badge {
+    padding-right: 12px;
+  }
+}

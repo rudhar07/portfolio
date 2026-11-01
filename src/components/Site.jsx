@@ -1,5 +1,7 @@
 import { site } from '../content/site.js'
+import { cp } from '../content/cp.js'
 import Stage from './Stage.jsx'
+import Ticker from './Ticker.jsx'
 import RedSide from './RedSide.jsx'
 import BlackSide from './BlackSide.jsx'
 import Contact from './Contact.jsx'
@@ -11,6 +13,15 @@ import { Header, PaddleFlip, Scoreboard } from './Chrome.jsx'
  * two renders always match.
  */
 export default function Site({ stats }) {
+  const live = [
+    `${cp.total} problems solved`,
+    `LeetCode ${stats.leetcode.all} · ${stats.leetcode.hard} hard`,
+    'Now: RL environments at Scaler AI Labs',
+    `Last shipped: ${site.lastShipped}`,
+    'State-level table tennis',
+  ]
+  const serve = ['Return the serve', site.email, 'Internships · collaborations · a match']
+
   return (
     <>
       <a className="skip" href="#main">
@@ -20,8 +31,10 @@ export default function Site({ stats }) {
       <Scoreboard />
       <main id="main">
         <Stage />
+        <Ticker label="Live" items={live} />
         <RedSide stats={stats} />
         <BlackSide />
+        <Ticker label="Serve" items={serve} reverse />
         <Contact />
       </main>
       <footer className="footer">
