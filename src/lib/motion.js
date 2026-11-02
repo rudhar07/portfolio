@@ -6,7 +6,10 @@
  *  - Reveals: elements marked [data-reveal] wipe up into place the first time they enter the
  *    viewport. The hidden state is gated on html.motion, which is only set here, so if this
  *    module never runs every element is simply visible.
+ *  - Pointer effects (lib/hover.js): tilting match cards and magnetic buttons.
  */
+
+import { startHover } from './hover.js'
 
 let lenis = null
 
@@ -57,6 +60,8 @@ export async function startMotion() {
     requestAnimationFrame(settlePassed)
   }
   window.addEventListener('scroll', onScroll, { passive: true })
+
+  startHover()
 
   const { default: Lenis } = await import('lenis')
   lenis = new Lenis({ duration: 1.1, smoothWheel: true })
