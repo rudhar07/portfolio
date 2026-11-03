@@ -3,6 +3,7 @@ import { education, experience } from '../content/experience.js'
 import { alsoPlayed, matches } from '../content/matches.js'
 import { cp, kit } from '../content/cp.js'
 import { SectionHead } from './bits.jsx'
+import MatchMap from './MatchMap.jsx'
 
 /** The engineer: work, matches (projects), competitive programming, kit, education. */
 export default function RedSide({ stats }) {
@@ -41,47 +42,50 @@ export default function RedSide({ stats }) {
           title="Matches played."
           body="Each project is a match: the problem it had to beat, the result, and the shot that won it."
         />
-        <ol className="matches">
-          {matches.map((m, i) => (
-            <li className="match" key={m.name} data-reveal>
-              <div className="match-head">
-                <span className="match-num mono">M{String(i + 1).padStart(2, '0')}</span>
-                <h3 className="match-name">{m.name}</h3>
-                <span className="match-links">
-                  {m.repo && (
-                    <a href={m.repo} target="_blank" rel="noopener noreferrer">
-                      Repo<span className="sr-only"> for {m.name}</span> ↗
-                    </a>
-                  )}
-                  {m.live && (
-                    <a href={m.live} target="_blank" rel="noopener noreferrer">
-                      Live<span className="sr-only"> {m.name}</span> ↗
-                    </a>
-                  )}
-                </span>
-              </div>
-              <dl className="match-stats">
-                <div>
-                  <dt>Opponent</dt>
-                  <dd>{m.opponent}</dd>
+        <div className="matches-wrap">
+          <MatchMap matches={matches} />
+          <ol className="matches">
+            {matches.map((m, i) => (
+              <li className="match" key={m.name} data-match={i} data-reveal>
+                <div className="match-head">
+                  <span className="match-num mono">M{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="match-name">{m.name}</h3>
+                  <span className="match-links">
+                    {m.repo && (
+                      <a href={m.repo} target="_blank" rel="noopener noreferrer">
+                        Repo<span className="sr-only"> for {m.name}</span> ↗
+                      </a>
+                    )}
+                    {m.live && (
+                      <a href={m.live} target="_blank" rel="noopener noreferrer">
+                        Live<span className="sr-only"> {m.name}</span> ↗
+                      </a>
+                    )}
+                  </span>
                 </div>
-                <div className="match-score">
-                  <dt>Scoreline</dt>
-                  <dd>{m.scoreline}</dd>
-                </div>
-                <div>
-                  <dt>Key point</dt>
-                  <dd>{m.keyPoint}</dd>
-                </div>
-              </dl>
-              <ul className="chips" aria-label="Stack">
-                {m.stack.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
+                <dl className="match-stats">
+                  <div>
+                    <dt>Opponent</dt>
+                    <dd>{m.opponent}</dd>
+                  </div>
+                  <div className="match-score">
+                    <dt>Scoreline</dt>
+                    <dd>{m.scoreline}</dd>
+                  </div>
+                  <div>
+                    <dt>Key point</dt>
+                    <dd>{m.keyPoint}</dd>
+                  </div>
+                </dl>
+                <ul className="chips" aria-label="Stack">
+                  {m.stack.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </div>
 
         <h3 className="subhead" data-reveal>
           Also played

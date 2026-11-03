@@ -1,0 +1,169 @@
+/*
+ * The table as the map of the work (components/MatchMap.jsx). Desktop only: below 1080px the
+ * matches stay a single column of cards and the map is not drawn at all.
+ */
+
+.map {
+  display: none;
+}
+
+@media (min-width: 1080px) {
+  .matches-wrap {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.42fr) 1fr;
+    gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+  }
+
+  /* the narrower card column reads better as label / value rows than as three columns */
+  .matches-wrap .match-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .matches-wrap .match-stats > div,
+  .matches-wrap .match-stats > div + div {
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-left: 0;
+  }
+
+  .matches-wrap .match-stats > div + div {
+    border-top: 1px solid var(--line);
+  }
+
+  .matches-wrap .match-stats dt {
+    margin: 4px 0 0;
+  }
+
+  .map {
+    display: block;
+    position: sticky;
+    top: 104px;
+  }
+}
+
+.map-view {
+  perspective: 1100px;
+  perspective-origin: 50% 0%;
+  display: flex;
+  justify-content: center;
+}
+
+.map-table {
+  position: relative;
+  height: min(62vh, 560px);
+  aspect-ratio: 152.5 / 274;
+  background: var(--table-blue);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+  transform: rotateX(var(--tilt, 0deg));
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+}
+
+.map-centre {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.map-net {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  top: 50%;
+  height: 3px;
+  translate: 0 -50%;
+  background: repeating-linear-gradient(90deg, #f4f1ea 0 3px, rgba(244, 241, 234, 0.35) 3px 6px);
+}
+
+.map-spot {
+  position: absolute;
+  translate: -50% -50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--rubber-red);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition:
+    background 0.4s ease,
+    color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+/* with motion on, a spot stays dark until the ball has landed on it */
+html.motion .map-spot:not(.landed) {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  border-style: dashed;
+}
+
+.map-spot.active {
+  box-shadow:
+    0 0 0 4px rgba(215, 38, 61, 0.35),
+    0 0 28px 6px rgba(215, 38, 61, 0.55);
+}
+
+.map-ball,
+.map-shadow {
+  position: absolute;
+  left: 50%;
+  top: 104%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.map-ball {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 30%, #fff, #f2efe8 45%, #c9c4b8);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.map-shadow {
+  width: 14px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  filter: blur(2px);
+  opacity: 0.6;
+}
+
+/* no motion: the ball has nowhere to fly from, so it simply is not shown */
+html:not(.motion) .map-ball,
+html:not(.motion) .map-shadow {
+  display: none;
+}
+
+.map-caption {
+  margin: 22px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 2.6em;
+  text-align: center;
+}
+
+.map-caption-num {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.map-caption-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  text-transform: uppercase;
+}
