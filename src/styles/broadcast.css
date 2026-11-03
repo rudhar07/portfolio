@@ -1,0 +1,229 @@
+/*
+ * Broadcast graphics over the hero table (components/Broadcast.jsx). Fixed colours, not theme
+ * tokens: they sit on the 3D scene, like a TV graphic sits on the picture, on either side.
+ */
+
+.bc {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+/* letterbox bars slide in while a replay plays */
+.bc-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 9%;
+  background: #000;
+  transform: scaleY(0);
+  transition: transform 0.45s var(--ease);
+}
+
+.bc-bar-top {
+  top: 0;
+  transform-origin: top;
+}
+
+.bc-bar-bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+.bc[data-replay] .bc-bar {
+  transform: scaleY(1);
+}
+
+.bc-tags {
+  position: absolute;
+  top: 12%;
+  left: 0;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.bc-tag {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #fff;
+  background: #0b0b0b;
+  animation: bc-in 0.35s var(--ease) both;
+}
+
+.bc-replay {
+  background: var(--rubber-red);
+}
+
+.bc-speed {
+  opacity: 0.75;
+}
+
+.bc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  animation: bc-blink 1s steps(2, start) infinite;
+}
+
+.bc-mode {
+  color: #0b0b0b;
+  background: #22c55e;
+}
+
+/* lower-third */
+.bc-third {
+  position: absolute;
+  left: 0;
+  bottom: 13%;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: stretch;
+  max-width: min(92%, 440px);
+  color: #0b0b0b;
+  background: #f4f1ea;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+  animation:
+    bc-in 0.5s var(--ease) both,
+    bc-out 0.35s ease calc(var(--ms, 2600ms) - 350ms) forwards;
+}
+
+.bc-third .bc-kicker {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #fff;
+  background: var(--rubber-red);
+}
+
+.bc-third-hacker .bc-kicker {
+  color: #0b0b0b;
+  background: #22c55e;
+}
+
+.bc-third-best .bc-kicker {
+  background: #0b0b0b;
+}
+
+.bc-title {
+  padding: 10px 16px 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.bc-line {
+  padding: 4px 16px 12px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #57534c;
+}
+
+/* the verifier's call */
+.bc-verdict {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  translate: -50% -50%;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: min(86%, 360px);
+  padding: 16px 18px 18px;
+  text-align: center;
+  color: #f4f1ea;
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+  animation:
+    bc-pop 0.4s var(--ease) both,
+    bc-out 0.35s ease calc(var(--ms, 2400ms) - 350ms) forwards;
+}
+
+.bc-verdict .bc-kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: #22c55e;
+}
+
+.bc-verdict .bc-title {
+  padding: 0;
+  font-size: 40px;
+  color: #ff5a69;
+}
+
+.bc-verdict .bc-line {
+  padding: 0;
+  color: #f4f1ea;
+  text-transform: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.bc-point {
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #0b0b0b;
+  background: #22c55e;
+}
+
+@keyframes bc-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-12px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+@keyframes bc-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes bc-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bc-blink {
+  to {
+    opacity: 0.2;
+  }
+}
+
+@media (max-width: 820px) {
+  .bc-title {
+    font-size: 26px;
+  }
+  .bc-verdict .bc-title {
+    font-size: 32px;
+  }
+}

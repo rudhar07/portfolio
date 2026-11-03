@@ -5,7 +5,7 @@
  * snapshot is what the prerendered HTML was built with.
  */
 
-function createStore(get, getServer) {
+export function createStore(get, getServer) {
   const listeners = new Set()
   return {
     subscribe(fn) {

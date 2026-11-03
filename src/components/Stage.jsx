@@ -1,12 +1,17 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { site, sides } from '../content/site.js'
 import { rallyStore, reportRally, sideStore } from '../lib/stores.js'
+import { broadcastStore, reportEvent } from '../lib/broadcast.js'
+import Broadcast from './Broadcast.jsx'
 
 /**
  * The hero. Text for both sides is in the HTML; CSS shows the one that matches <html data-side>.
  * The 3D table waits until the page has loaded and the main thread is idle: parsing three.js and
  * compiling its shaders is the single most expensive thing the page does, and on a phone it
  * should never compete with the text becoming readable and tappable.
+ *
+ * Typing "spin" anywhere on the page (outside a form field) swaps the opponent for the reward
+ * hacker; typing it again, or Esc, brings the fair one back.
  */
 export default function Stage() {
   const canvasRef = useRef(null)
@@ -26,8 +31,10 @@ export default function Stage() {
       import('../scene/rally.js')
         .then(({ mountRally }) => {
           if (cancelled) return
-          scene = mountRally(el, { reducedMotion, lowPower, side: sideStore.get(), onRally: reportRally })
+          scene = mountRally(el, { reducedMotion, lowPower, side: sideStore.get(), onRally: reportRally, onEvent: reportEvent })
           el.dataset.ready = 'true'
+          // automated browsers get the scene's debug handle, so the tests can play real rallies
+          if (navigator.webdriver) window.__rally = scene.debug
         })
         .catch(() => {
           // no WebGL or the chunk failed: the stage just stays a quiet panel
@@ -41,7 +48,25 @@ export default function Stage() {
     if (document.readyState === 'complete') whenIdle()
     else window.addEventListener('load', whenIdle, { once: true })
 
+    let typed = ''
+    const onKey = (e) => {
+      if (!scene || e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return
+      const hacker = broadcastStore.get().mode === 'hacker'
+      if (e.key === 'Escape' && hacker) {
+        scene.setMode('fair')
+        return
+      }
+      typed = (typed + e.key.toLowerCase()).slice(-4)
+      if (typed === 'spin') {
+        typed = ''
+        scene.setMode(hacker ? 'fair' : 'hacker')
+      }
+    }
+    window.addEventListener('keydown', onKey)
+
     return () => {
+      window.removeEventListener('keydown', onKey)
       cancelled = true
       window.removeEventListener('load', whenIdle)
       if (window.cancelIdleCallback) window.cancelIdleCallback(idleId)
@@ -89,6 +114,7 @@ export default function Stage() {
 
       <div className="stage-table">
         <div className="stage-canvas" ref={canvasRef} />
+        <Broadcast />
         <p className="stage-hint" aria-hidden="true">
           <span className="hint-pointer">
             {user ? (
