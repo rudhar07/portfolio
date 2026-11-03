@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 · Rudhar Bajaj</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <!--
+      Served by Vercel for any path that does not exist. Standalone on purpose: no bundle, so it
+      works even if the app build is what broke. The ball clears the net, clips the far edge of the
+      table and drops to the floor, on a loop; with reduced motion it just lies where it fell.
+    -->
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0a0a;
+        --ink: #f4f1ea;
+        --muted: #a19d94;
+        --line: rgba(244, 241, 234, 0.12);
+        --red: #d7263d;
+        --red-ink: #ff5a69;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        width: min(720px, calc(100% - 32px));
+        padding: 48px 0;
+      }
+      .eyebrow {
+        margin: 0 0 12px;
+        font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--red-ink);
+      }
+      h1 {
+        margin: 0;
+        font-family: 'Bebas Neue', Impact, sans-serif;
+        font-weight: 400;
+        font-size: clamp(96px, 22vw, 200px);
+        line-height: 0.85;
+      }
+      p {
+        margin: 18px 0 0;
+        max-width: 46ch;
+        font-size: 18px;
+        color: var(--muted);
+      }
+      code {
+        font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+        font-size: 0.85em;
+        color: var(--ink);
+        word-break: break-all;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 40px 0 32px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 14px 22px;
+        background: var(--red);
+        color: #fff;
+        font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+      .btn:hover {
+        background: var(--red-ink);
+      }
+      .btn:focus-visible {
+        outline: 2px solid var(--red-ink);
+        outline-offset: 3px;
+      }
+      .ball-rest {
+        display: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ball-live {
+          display: none;
+        }
+        .ball-rest {
+          display: inline;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">404 · Out</p>
+      <h1>Out.</h1>
+      <p>That ball missed the table. Nothing lives at <code id="path">this address</code>.</p>
+
+      <svg viewBox="0 0 600 220" role="img" aria-label="A ball clears the net, clips the far edge of the table and drops to the floor.">
+        <line x1="0" y1="211" x2="600" y2="211" stroke="rgba(244,241,234,0.12)" />
+        <!-- legs, table top, the far edge it clipped, net -->
+        <path d="M96 136 V211 M444 136 V211" stroke="rgba(244,241,234,0.25)" stroke-width="4" />
+        <rect x="60" y="130" width="420" height="7" fill="#0d3b66" />
+        <line x1="60" y1="130" x2="480" y2="130" stroke="#f4f1ea" stroke-width="2" />
+        <line x1="472" y1="130" x2="480" y2="130" stroke="#d7263d" stroke-width="4" />
+        <line x1="270" y1="104" x2="270" y2="130" stroke="#f4f1ea" stroke-width="3" stroke-dasharray="3 2" />
+        <circle class="ball-live" r="6" fill="#f4f1ea">
+          <animateMotion
+            dur="2.6s"
+            repeatCount="indefinite"
+            keyPoints="0;1;1"
+            keyTimes="0;0.7;1"
+            calcMode="linear"
+            path="M30 80 Q105 30 180 124 Q330 -40 480 124 Q512 140 534 205 Q551 172 568 205 Q578 192 588 205"
+          />
+        </circle>
+        <circle class="ball-rest" cx="588" cy="205" r="6" fill="#f4f1ea" />
+      </svg>
+
+      <a class="btn" href="/">Serve again</a>
+    </main>
+    <script>
+      document.getElementById('path').textContent = location.pathname
+    </script>
+  </body>
+</html>
