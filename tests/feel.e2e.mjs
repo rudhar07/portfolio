@@ -24,7 +24,11 @@ export default async function ({ browser, URL, check, watchErrors }) {
     check('title split into letters', letters === 'Matchesplayed.'.length, `${letters} letters`)
 
     const first = '#matches .section-title .spin-ch'
-    check('letters wait below the fold', (await opacityOf(page, first)) === 0)
+    // they fade dark as motion switches on (0.35s), then wait there until the section arrives
+    const hidden = await page
+      .waitForFunction((s) => getComputedStyle(document.querySelector(s)).opacity === '0', first, { timeout: 3000 })
+      .then(() => true, () => false)
+    check('letters wait below the fold', hidden)
     await page.evaluate(() => document.querySelector('#matches').scrollIntoView())
     await page.waitForTimeout(2200)
     const m = await matrixOf(page, first)
