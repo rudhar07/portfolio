@@ -14,6 +14,13 @@
  * make count toward the rally. Miss and the opponent serves again. On touch, each return gives a
  * short vibration where the device supports it, and lifting the finger hands the paddle back to
  * the computer after a grace period, so you can let go between shots.
+ *
+ * Broadcast moments: lose a rally of 3 or more and the last couple of seconds play back in slow
+ * motion with a trail behind the ball (a click skips it). The hidden level swaps the opponent for
+ * a reward hacker: its rubber turns green and every few shots it cheats instead of returning,
+ * either straight through the net or by teleporting the ball past you. A verifier catches each
+ * one, freezes the ball where the rules broke, and the point goes to you. The page hears about
+ * all of this through `onEvent` and draws the overlays.
  */
 
 import * as THREE from 'three'
@@ -30,6 +37,12 @@ const OPP_Z = -(HALF_L + 0.18)
 const REACH = 0.2 // how far either side of the ball the near paddle still makes contact
 const TOUCH_GRACE_MS = 2500 // how long the paddle stays yours after the finger lifts
 const HIT_BUZZ_MS = 14
+const REPLAY_SECONDS = 1.8 // how much of the lost rally the replay shows
+const REPLAY_SPEED = 0.4
+const REPLAY_MIN_RALLY = 3
+const TRAIL = 12 // ghost balls behind the replayed one
+const VERDICT_SECONDS = 1.6 // how long a caught cheat stays frozen on the table
+const CHEATS = ['net', 'teleport']
 
 const COLORS = {
   table: 0x174f86,
@@ -39,6 +52,7 @@ const COLORS = {
   wood: 0x8b5a2b,
   handle: 0x3a2418,
   ball: 0xfbfaf7,
+  hacker: 0x22c55e,
 }
 
 const rand = (a, b) => a + Math.random() * (b - a)
@@ -146,10 +160,16 @@ function makePaddle(front, back) {
  * Mount the rally into `container`.
  *
  * @param {HTMLElement} container
- * @param {{ reducedMotion: boolean, lowPower?: boolean, side?: 'red' | 'black', onRally: (s: {rally: number, user: boolean, input: 'mouse' | 'touch'}) => void }} opts
- * @returns {{ dispose: () => void, showSide: (side: 'red' | 'black') => void }}
+ * Events passed to `onEvent`:
+ *   { type: 'replay', on: boolean, speed?: number }  slow-motion replay started / ended
+ *   { type: 'mode', mode: 'fair' | 'hacker' }     the opponent changed
+ *   { type: 'verdict', reason: string, point: boolean }  the verifier caught a cheat
+ *
+ * @param {HTMLElement} container
+ * @param {{ reducedMotion: boolean, lowPower?: boolean, side?: 'red' | 'black', onRally: (s: {rally: number, user: boolean, input: 'mouse' | 'touch'}) => void, onEvent?: (e: object) => void }} opts
+ * @returns {{ dispose: () => void, showSide: (side: 'red' | 'black') => void, setMode: (mode: 'fair' | 'hacker') => void }}
  */
-export function mountRally(container, { reducedMotion, lowPower = false, onRally, side: initialSide = 'red' }) {
+export function mountRally(container, { reducedMotion, lowPower = false, onRally, onEvent = () => {}, side: initialSide = 'red' }) {
   // phones get no shadow pass and a lower pixel ratio: half the GPU work, same picture at arm's length
   const renderer = new THREE.WebGLRenderer({ antialias: !lowPower, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1.5 : 2))
@@ -183,6 +203,7 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
 
   const player = makePaddle(COLORS.red, COLORS.black)
   const opp = makePaddle(COLORS.red, COLORS.black)
+  const oppRubber = opp.children[1].material
   opp.rotation.y = Math.PI
   player.position.set(0.2, TABLE.h + 0.2, PLAYER_Z)
   opp.position.set(-0.1, TABLE.h + 0.2, OPP_Z)
@@ -200,6 +221,16 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   let input = 'mouse' // what is steering the near paddle while `user` is true
   let pointerX = 0
   let paddleVx = 0
+
+  // broadcast state
+  let mode = 'fair'
+  let oppReturns = 0
+  let nextCheat = 2
+  let cheat = null // the cheat riding on the ball in flight
+  let frozen = 0 // seconds a caught cheat stays on screen
+  let clock = 0
+  const history = [] // the last REPLAY_SECONDS of frames, for the replay
+  let replay = null // { frames, t } while a replay is playing
 
   const emit = () => onRally({ rally, user, input })
 
@@ -232,16 +263,126 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   function serve() {
     pos.set(rand(-0.3, 0.3), TABLE.h + 0.28, OPP_Z + 0.08)
     live = true
+    cheat = null
     hit('opp', rand(-0.5, 0.5), rand(0.55, 1.05), rand(4, 4.8))
   }
 
   function lose() {
     live = false
     deadFor = 0
+    if (user && rally >= REPLAY_MIN_RALLY && history.length > 10) startReplay()
     if (user && rally > 0) {
       rally = 0
       emit()
     }
+  }
+
+  // --- the reward hacker ---------------------------------------------------------------------
+  function setMode(next) {
+    if (reducedMotion || next === mode) return
+    mode = next
+    oppRubber.color.setHex(mode === 'hacker' ? COLORS.hacker : COLORS.red)
+    oppReturns = 0
+    nextCheat = 2
+    onEvent({ type: 'mode', mode })
+  }
+
+  /** The opponent's return, unless it is a hacker due to cheat. */
+  function oppShot() {
+    if (mode !== 'hacker' || ++oppReturns < nextCheat) {
+      hit('opp', rand(-0.6, 0.6), rand(0.5, 1.15), rand(4, 5.6))
+      return
+    }
+    oppReturns = 0
+    nextCheat = 2 + Math.floor(rand(0, 2))
+    cheat = CHEATS[Math.floor(rand(0, CHEATS.length))]
+    if (cheat === 'net') {
+      // a flat, low drive: it cannot clear the band, and it does not mean to
+      pos.y = TABLE.h + 0.05
+      const t = 0.24
+      vel.set((rand(-0.4, 0.4) - pos.x) / t, (BALL_R + 0.5 * G * t * t - 0.05) / t, (0.45 - pos.z) / t)
+      hitter = 'opp'
+      bounces = { player: 0, opp: 0 }
+      pock('paddle')
+    } else {
+      hit('opp', rand(-0.5, 0.5), rand(0.6, 1.1), rand(4.4, 5))
+    }
+  }
+
+  function caught(reason) {
+    live = false
+    frozen = VERDICT_SECONDS
+    ball.material.color.setHex(COLORS.red)
+    const point = user
+    if (user) {
+      rally += 1
+      emit()
+    }
+    cheat = null
+    onEvent({ type: 'verdict', reason, point })
+  }
+
+  // --- slow-motion replay --------------------------------------------------------------------
+  const ghosts = []
+  for (let i = 0; i < TRAIL; i++) {
+    const g = new THREE.Mesh(
+      new THREE.SphereGeometry(BALL_R * (1 - i / (TRAIL * 1.6)), 16, 8),
+      new THREE.MeshBasicMaterial({ color: COLORS.red, transparent: true, opacity: 0.55 * (1 - i / TRAIL), depthWrite: false }),
+    )
+    g.visible = false
+    scene.add(g)
+    ghosts.push(g)
+  }
+
+  function record(dt) {
+    clock += dt
+    history.push({
+      t: clock,
+      ball: pos.clone(),
+      seen: ball.visible,
+      player: player.position.clone(),
+      tilt: player.rotation.z,
+      opp: opp.position.clone(),
+    })
+    while (history.length && history[0].t < clock - REPLAY_SECONDS) history.shift()
+  }
+
+  function frameAt(t) {
+    const { frames } = replay
+    let i = 0
+    while (i < frames.length - 1 && frames[i + 1].t <= t) i++
+    return frames[i]
+  }
+
+  function startReplay() {
+    const frames = history.splice(0)
+    replay = { frames, t: frames[0].t }
+    onEvent({ type: 'replay', on: true, speed: REPLAY_SPEED })
+  }
+
+  function endReplay() {
+    if (!replay) return
+    replay = null
+    ghosts.forEach((g) => (g.visible = false))
+    deadFor = 0
+    onEvent({ type: 'replay', on: false })
+  }
+
+  function playReplay(dt) {
+    replay.t += dt * REPLAY_SPEED
+    const end = replay.frames[replay.frames.length - 1].t
+    if (replay.t >= end) return endReplay()
+    const f = frameAt(replay.t)
+    ball.position.copy(f.ball)
+    ball.visible = f.seen
+    player.position.copy(f.player)
+    player.rotation.z = f.tilt
+    opp.position.copy(f.opp)
+    ghosts.forEach((g, i) => {
+      const past = frameAt(replay.t - (i + 1) * 0.022)
+      g.position.copy(past.ball)
+      g.visible = past.seen && past !== f
+    })
   }
 
   function step(dt) {
@@ -249,8 +390,23 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
     const prevZ = pos.z
     pos.addScaledVector(vel, dt)
 
+    // the hacker's cheats, caught the moment the rules break
+    const crossed = Math.sign(prevZ) !== Math.sign(pos.z)
+    if (cheat === 'net' && crossed) {
+      if (pos.y < TABLE.h + TABLE.net) {
+        pos.z = 0
+        return caught('The ball went through the net.')
+      }
+      cheat = null // it cleared the band after all: a fair shot
+    }
+    if (cheat === 'teleport' && pos.z > 0.2) {
+      const from = pos.z
+      pos.set(pos.x * 0.6, TABLE.h + 0.12, PLAYER_Z + 0.45)
+      return caught(`The ball skipped ${(pos.z - from).toFixed(1)} m of its flight.`)
+    }
+
     // net: crossing the net plane below the band kills the ball
-    if (Math.sign(prevZ) !== Math.sign(pos.z) && pos.y < TABLE.h + TABLE.net && Math.abs(pos.x) < HALF_W + 0.15) {
+    if (crossed && pos.y < TABLE.h + TABLE.net && Math.abs(pos.x) < HALF_W + 0.15) {
       pos.z = prevZ
       vel.z *= -0.15
       vel.x *= 0.3
@@ -281,7 +437,7 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
 
     if (live && hitter === 'player' && bounces.opp === 1 && vel.z < 0 && (pos.z <= OPP_Z + 0.04 || (vel.y < 0 && pos.y < TABLE.h + 0.14))) {
       opp.position.x = pos.x
-      hit('opp', rand(-0.6, 0.6), rand(0.5, 1.15), rand(4, 5.6))
+      oppShot()
     }
 
     // near paddle
@@ -315,13 +471,15 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   }
 
   // --- view ----------------------------------------------------------------------------------
+  let baseFov = 32
   function frameCamera() {
     const { clientWidth: w, clientHeight: h } = container
     if (!w || !h) return
     renderer.setSize(w, h, false)
     camera.aspect = w / h
     const narrow = camera.aspect < 1
-    camera.fov = narrow ? 42 : 32
+    baseFov = narrow ? 42 : 32
+    camera.fov = replay ? baseFov * 0.8 : baseFov
     camera.position.set(narrow ? 0 : 0.6, narrow ? 2.6 : 2.15, narrow ? 4.6 : 4.4)
     camera.lookAt(0, TABLE.h - 0.12, -0.3)
     camera.updateProjectionMatrix()
@@ -363,6 +521,7 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
   let touching = false
   let releaseTimer = 0
   function onDown(e) {
+    endReplay() // a click or tap skips the replay
     if (e.pointerType !== 'touch') return
     touching = true
     clearTimeout(releaseTimer)
@@ -398,6 +557,7 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
         player.rotation.y = facing = facingTarget
         renderer.render(scene, camera)
       },
+      setMode() {},
       dispose() {
         ro.disconnect()
         renderer.dispose()
@@ -426,16 +586,42 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
     last = now
     if (!visible || document.hidden) return
 
+    // the replay zooms in a little, like a broadcast cutting to the slow-mo camera
+    const fov = replay ? baseFov * 0.8 : baseFov
+    if (Math.abs(camera.fov - fov) > 0.01) {
+      camera.fov += (fov - camera.fov) * Math.min(1, dt * 4)
+      camera.updateProjectionMatrix()
+    }
+
+    if (replay) {
+      playReplay(dt)
+      renderer.render(scene, camera)
+      return
+    }
+    if (frozen > 0) {
+      // a caught cheat: the ball stays where the rule broke while the verifier speaks
+      frozen -= dt
+      if (frozen <= 0) {
+        ball.material.color.setHex(COLORS.ball)
+        deadFor = 0.4
+      }
+      ball.position.copy(pos)
+      ball.visible = true
+      renderer.render(scene, camera)
+      return
+    }
+
     if (live) {
       const n = 4
-      for (let i = 0; i < n; i++) step(dt / n)
+      for (let i = 0; i < n && live; i++) step(dt / n)
     } else {
       deadFor += dt
       if (deadFor > 0.9) serve()
     }
-    rackets(dt)
+    if (frozen <= 0) rackets(dt)
     ball.position.copy(pos)
-    ball.visible = live || deadFor < 0.4
+    ball.visible = live || frozen > 0 || deadFor < 0.4
+    record(dt)
     renderer.render(scene, camera)
   }
   // one frame up front, so the table is there even if the tab starts in the background
@@ -447,9 +633,10 @@ export function mountRally(container, { reducedMotion, lowPower = false, onRally
 
   return {
     showSide,
+    setMode,
     // for scripted checks of the rally (see CHANGES.md): read the ball, steer the near paddle
     debug: {
-      state: () => ({ x: pos.x, y: pos.y, z: pos.z, live, rally, user, input, hitter }),
+      state: () => ({ x: pos.x, y: pos.y, z: pos.z, live, rally, user, input, hitter, mode, replay: !!replay, frozen: frozen > 0 }),
       steer(x, type = 'mouse') {
         takeOver(type)
         pointerX = x
